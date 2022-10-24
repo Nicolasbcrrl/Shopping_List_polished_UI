@@ -1,8 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, TextInput, View, Button, FlatList, Alert } from 'react-native';
+import { StyleSheet, Text, TextInput, View, FlatList, Alert } from 'react-native';
 import { useState, useEffect} from 'react';
 import { initializeApp } from "firebase/app";
 import { getDatabase, push, ref, onValue, remove } from'firebase/database';
+import { Header } from 'react-native-elements';
+import { Input, Button, Icon, ListItem } from 'react-native-elements';
 
 export default function App() {
   const [product, setProduct] = useState('');
@@ -30,6 +32,8 @@ export default function App() {
         ref(database, 'items/'),     
         { 'product': product, 'amount': amount 
       });
+      setProduct('');
+      setAmount('');
     }
     else {
       Alert.alert('Please enter product and amount');
@@ -62,43 +66,48 @@ export default function App() {
   
   return (
     <View style={styles.container}>
-
-      <TextInput
-        style={styles.textInputStyle}
+      <Header
+        centerComponent={{ text: 'SHOPPING LIST', style: { color: '#fff' } }}
+      />
+      
+      <Input
+        label="PRODUCT"
         placeholder='Product'
         onChangeText={value => setProduct(value)}
         value={product}
       />
 
-      <TextInput
-        style={styles.textInputStyle}
+      <Input
+        label="AMOUNT"
         placeholder='Amount'
         onChangeText={value => setAmount(value)}
         value={amount}
       />
-
-      <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center', width: '75%' }}>
-        <Button
-            style={styles.buttonStyle}
-            title="Save"
-            onPress={saveItem}
+      <Button
+        containerStyle={{width: 200, marginHorizontal: 50, marginVertical: 10}}
+        raised
+        icon={{ name: 'save', color: 'white' }}
+        title="SAVE"
+        onPress={saveItem}
+      />
+      <View style={{ flexDirection: "column", justifyContent: 'center', alignItems: 'center', width: '100%', margin: 20 }}>
+        <FlatList
+            style={{ width: '100%' }}
+            data={listProd}
+            renderItem={({item}) =>
+            
+              <ListItem bottomDivider>
+                <ListItem.Content>
+                  <ListItem.Title>{item.product}</ListItem.Title>
+                  <ListItem.Subtitle>{item.amount}</ListItem.Subtitle>
+                </ListItem.Content>
+                <Button type= "clear"  icon={{name:"delete", color:"red"}} onPress={() => deleteItem(item.key)}> delete</Button>
+              </ListItem>
+            
+            }
         />
       </View>
       
-
-      <View style={{ flexDirection: "column", justifyContent: 'center', alignItems: 'center', width: '100%', margin: 20 }}>
-        <Text style= {{ color: 'blue', fontSize: 16, fontWeight: 'bold' }} >Shopping List</Text>
-        <FlatList
-            data={listProd}
-            renderItem={({item}) =>
-              <View style={styles.listContainer}>
-                <Text>{item.product}, {item.amount}</Text>
-                <Text style={{color: '#0000ff'}} onPress={() => deleteItem(item.key)}> delete</Text>
-              </View>
-            }
-            keyExtractor={(item, index) => index.toString()}
-        />
-      </View>
       
       <StatusBar style="auto" />
     </View>
@@ -107,11 +116,19 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 3,
+    flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     height:'100%'
+  },
+  headerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#397af8',
+    marginBottom: 20,
+    width: '100%',
+    paddingVertical: 15,
   },
   inputStyle:{
     width:200,
